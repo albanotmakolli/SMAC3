@@ -132,7 +132,7 @@ class AcquisitionFunctionMaximizer(object, metaclass=abc.ABCMeta):
     def _sort_configs_by_acq_value(
             self,
             configs: List[Configuration],
-            costs: List[float]
+            costs: List[float]=[]
     ) -> List[Tuple[float, Configuration]]:
         """Sort the given configurations by acquisition value
 
@@ -571,6 +571,8 @@ class RandomSearch(AcquisitionFunctionMaximizer):
         if _sorted:
             for i in range(len(rand_configs)):
                 rand_configs[i].origin = 'Random Search (sorted)'
+                configs_previous_runs = runhistory.get_all_configs()
+                costs = [runhistory.get_cost(run) for run in configs_previous_runs]
             return self._sort_configs_by_acq_value(rand_configs)
         else:
             for i in range(len(rand_configs)):
@@ -757,4 +759,4 @@ class FixedSet(AcquisitionFunctionMaximizer):
         configurations = copy.deepcopy(self.configurations)
         for config in configurations:
             config.origin = 'Fixed Set'
-        return self._sort_configs_by_acq_value(configurations)
+        return self._sort_configs_by_acq_value(configurations, [])
