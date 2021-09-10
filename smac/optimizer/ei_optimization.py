@@ -131,7 +131,8 @@ class AcquisitionFunctionMaximizer(object, metaclass=abc.ABCMeta):
 
     def _sort_configs_by_acq_value(
             self,
-            configs: List[Configuration]
+            configs: List[Configuration],
+            costs: List[float]
     ) -> List[Tuple[float, Configuration]]:
         """Sort the given configurations by acquisition value
 
@@ -145,7 +146,7 @@ class AcquisitionFunctionMaximizer(object, metaclass=abc.ABCMeta):
                 ordered by their acquisition function value
         """
 
-        acq_values = self.acquisition_function(configs)
+        acq_values = self.acquisition_function(configs, costs)
 
         # From here
         # http://stackoverflow.com/questions/20197990/how-to-make-argsort-result-to-be-random-between-equal-values
@@ -254,9 +255,12 @@ class LocalSearch(AcquisitionFunctionMaximizer):
         else:
             # initiate local search
             configs_previous_runs = runhistory.get_all_configs()
+            costs = [runhistory.get_cost(run) for run in configs_previous_runs]
 
             # configurations with the highest previous EI
-            configs_previous_runs_sorted = self._sort_configs_by_acq_value(configs_previous_runs)
+            
+            _sorted = self._sort_configs_by_acq_value(configs_previous_runs,
+                                                     costs)
             configs_previous_runs_sorted = [conf[1] for conf in configs_previous_runs_sorted[:num_points]]
 
             # configurations with the lowest predictive cost, check for None to make unit tests work
