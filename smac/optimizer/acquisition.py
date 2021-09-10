@@ -61,7 +61,7 @@ class AbstractAcquisitionFunction(object, metaclass=abc.ABCMeta):
             if key in self._required_updates:
                 setattr(self, key, kwargs[key])
 
-    def __call__(self, configurations: List[Configuration]) -> np.ndarray:
+    def __call__(self, configurations: List[Configuration], costs: List[float] = []) -> np.ndarray:
         """Computes the acquisition value for a given X
 
         Parameters
@@ -79,14 +79,14 @@ class AbstractAcquisitionFunction(object, metaclass=abc.ABCMeta):
         if len(X.shape) == 1:
             X = X[np.newaxis, :]
 
-        acq = self._compute(X)
+        acq = self._compute(X, costs)
         if np.any(np.isnan(acq)):
             idx = np.where(np.isnan(acq))[0]
             acq[idx, :] = -np.finfo(np.float).max
         return acq
 
     @abc.abstractmethod
-    def _compute(self, X: np.ndarray) -> np.ndarray:
+    def _compute(self, X: np.ndarray, costs: List[float]=[]) -> np.ndarray:
         """Computes the acquisition value for a given point X. This function has
         to be overwritten in a derived class.
 
